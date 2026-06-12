@@ -9,4 +9,5 @@
 Day 0:
 
     Project setup and GitHub initialization
-    
+    Django project setup and initial server run
+    Created Product model and admin panel setup
