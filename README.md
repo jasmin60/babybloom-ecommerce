@@ -16,3 +16,4 @@ Day 0:
 Day 1:
      
     Added POST API and product detail API 
+    Completed full CRUD operations (GET, POST, PUT, DELETE)
