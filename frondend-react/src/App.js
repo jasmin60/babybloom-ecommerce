@@ -3,6 +3,7 @@ import axios from "axios";
 
 function App() {
   const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
 
   useEffect(() => {
     axios
@@ -13,16 +14,40 @@ function App() {
       .catch((err) => console.log(err));
   }, []);
 
-  return (
-    <div>
-      <h1>SmartCart Products</h1>
+  // Add to cart function
+  const addToCart = (product) => {
+    setCart([...cart, product]);
+  };
 
-      {products.map((product) => (
-        <div key={product.id}>
-          <h3>{product.name}</h3>
-          <p>Price: {product.price}</p>
-        </div>
-      ))}
+  return (
+    <div style={{ padding: "20px" }}>
+      <h1>SmartCart</h1>
+
+      {/* Cart Count */}
+      <h2>Cart Items: {cart.length}</h2>
+
+      {/* Products */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+        {products.map((product) => (
+          <div
+            key={product.id}
+            style={{
+              border: "1px solid #ccc",
+              padding: "15px",
+              width: "200px",
+              borderRadius: "10px",
+            }}
+          >
+            <h3>{product.name}</h3>
+            <p>Price: ₹{product.price}</p>
+            <p>{product.description}</p>
+
+            <button onClick={() => addToCart(product)}>
+              Add to Cart
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
