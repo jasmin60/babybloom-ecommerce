@@ -12,3 +12,7 @@ Day 0:
     Django project setup and initial server run
     Created Product model and admin panel setup
     Created Product API using Django REST Framework
+
+Day 1:
+     
+    Added POST API and product detail API 
