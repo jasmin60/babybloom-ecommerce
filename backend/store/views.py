@@ -4,6 +4,7 @@ from rest_framework import status
 from .models import Product
 from .serializers import ProductSerializer
 
+#Fetches all products from database and returns them as JSON
 
 # GET all products + POST new product
 @api_view(['GET', 'POST'])
