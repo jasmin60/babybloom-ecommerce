@@ -22,3 +22,8 @@ Day 1:
 Day 2:
      
     UI improvements and basic cart functionality
+    Updated cart functionality
+
+Day 3:
+    
+    Added routing and separate cart page
