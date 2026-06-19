@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Cart({ cart, removeFromCart }) {
   return (
@@ -14,6 +15,9 @@ function Cart({ cart, removeFromCart }) {
           <button onClick={() => removeFromCart(index)}>
             Remove
           </button>
+            <Link to="/checkout">
+                <button>Proceed to Checkout</button>    
+            </Link>
         </div>
       ))}
     </div>

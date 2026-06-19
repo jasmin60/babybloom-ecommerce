@@ -27,3 +27,4 @@ Day 2:
 Day 3:
     
     Added routing and separate cart page
+    Added checkout page and total price
