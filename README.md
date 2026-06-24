@@ -33,3 +33,8 @@ Day 3:
 Day 4:
     
     Updated frontend and added login page
+
+day 5:
+
+     Integrated authentication (login & signup)
+     implemented jwt authentication
