@@ -29,3 +29,7 @@ Day 3:
     Added routing and separate cart page
     Added checkout page and total price
     Next.js initialization
+
+Day 4:
+    
+    Updated frontend and added login page

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 function Auth({ setUser }) {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -6,15 +7,45 @@ function Auth({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleAuthSubmit = (e) => {
-    e.preventDefault();
-    if (!username || !password || (!isLoginView && !email)) {
-      alert("Please ensure all security login parameters are provided.");
-      return;
+  const handleAuthSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!username || !password || (!isLoginView && !email)) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  try {
+    if (isLoginView) {
+      // LOGIN API
+      const res = await axios.post("http://127.0.0.1:8000/api/login/", {
+        username,
+        password,
+      });
+
+      // Save token
+      localStorage.setItem("token", res.data.access);
+
+      // Set user
+      setUser({ username, token: res.data.access });
+
+      alert("Login successful");
+
+    } else {
+      // REGISTER API
+      await axios.post("http://127.0.0.1:8000/api/register/", {
+        username,
+        password,
+      });
+
+      alert("Registration successful. Please login.");
+      setIsLoginView(true);
     }
-    // Set simulated session profile context values
-    setUser({ username, email });
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Authentication failed");
+  }
+};
 
   return (
     <div className="auth-outer-wrap">

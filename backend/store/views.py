@@ -1,24 +1,24 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from .models import Product
-from .serializers import ProductSerializer, UserSerializer
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import Product, Order
+from .serializers import ProductSerializer, UserSerializer, OrderSerializer
 
 
 # 🔹 PRODUCT APIs
 
-# GET all products + POST new product
 @api_view(['GET', 'POST'])
 def product_list(request):
 
-    # GET all products
     if request.method == 'GET':
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
-    # CREATE new product
     elif request.method == 'POST':
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
@@ -27,7 +27,6 @@ def product_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# GET single + UPDATE + DELETE product
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail(request, pk):
 
@@ -39,12 +38,10 @@ def product_detail(request, pk):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # GET single product
     if request.method == 'GET':
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
-    # UPDATE product
     elif request.method == 'PUT':
         serializer = ProductSerializer(product, data=request.data)
         if serializer.is_valid():
@@ -52,7 +49,6 @@ def product_detail(request, pk):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # DELETE product
     elif request.method == 'DELETE':
         product.delete()
         return Response(
@@ -75,3 +71,33 @@ def register_user(request):
         )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# 🔹 ORDER API (Protected)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_order(request):
+
+    serializer = OrderSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save(user=request.user)  # 🔥 important
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=400)
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def make_payment(request, pk):
+    try:
+        order = Order.objects.get(id=pk, user=request.user)
+    except Order.DoesNotExist:
+        return Response({"error": "Order not found"}, status=404)
+
+    order.is_paid = True
+    order.payment_id = "PAY123456"  # dummy payment id
+    order.save()
+
+    return Response({"message": "Payment successful"})

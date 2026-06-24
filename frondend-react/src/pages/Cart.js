@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function Cart({ cart, removeFromCart }) {
-  const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const subtotal = cart.reduce((sum, item) => sum + (item.price|| 0), 0);
 
   // Fallback image asset mapper
   const getMiniImage = (name) => {

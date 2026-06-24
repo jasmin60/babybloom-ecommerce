@@ -3,8 +3,8 @@
 :root {
   --baby-pink: #FF8DA9;
   --baby-pink-light: #FFF0F3;
-  --baby-blue: #0288D1;
-  --baby-blue-light: #E1F5FE;
+  --baby-blue: #3e10e4;
+  --baby-blue-light: #1395d1;
   
   --surface-white: #FFFFFF;
   --body-bg: #FAF9F6;
@@ -374,6 +374,8 @@ body {
 
 .btn-primary-action:hover {
   background: var(--baby-blue);
+  background: var(--baby-blue-light);
+  
 }
 
 .auth-toggle-footer {
