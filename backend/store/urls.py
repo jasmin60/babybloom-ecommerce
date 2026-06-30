@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import make_payment, product_list, product_detail, create_order, register_user
+from .views import make_payment, product_list, product_detail, create_order, register_user, subcategory_list, subcategory_detail
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 urlpatterns = [

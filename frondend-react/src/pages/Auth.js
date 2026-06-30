@@ -1,111 +1,77 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-function Auth({ setUser }) {
+function Auth({ setUser, setShowGreetingModal }) {
   const [isLoginView, setIsLoginView] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleAuthSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    if (!username || !password || (!isLoginView && !email)) return;
 
-  if (!username || !password || (!isLoginView && !email)) {
-    alert("Please fill all fields");
-    return;
-  }
+    try {
+      if (isLoginView) {
+        const res = await axios.post("http://127.0.0.1:8000/api/login/", { username, password });
+        localStorage.setItem("token", res.data.access);
+        
+        // 🚀 CRITICAL TRIGGERS: Saves context data and instructs overlay to unlock layout views
+        setUser({ username, token: res.data.access });
+        setShowGreetingModal(true); 
 
-  try {
-    if (isLoginView) {
-      // LOGIN API
-      const res = await axios.post("http://127.0.0.1:8000/api/login/", {
-        username,
-        password,
-      });
-
-      // Save token
-      localStorage.setItem("token", res.data.access);
-
-      // Set user
-      setUser({ username, token: res.data.access });
-
-      alert("Login successful");
-
-    } else {
-      // REGISTER API
-      await axios.post("http://127.0.0.1:8000/api/register/", {
-        username,
-        password,
-      });
-
-      alert("Registration successful. Please login.");
-      setIsLoginView(true);
+      } else {
+        await axios.post("http://127.0.0.1:8000/api/register/", { username, password });
+        alert("Account registered. Proceed to login securely.");
+        setIsLoginView(true);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Authentication credentials rejected.");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Authentication failed");
-  }
-};
+  };
 
   return (
-    <div className="auth-outer-wrap">
+    <div className="auth-outer-wrap" style={{ padding: "40px 0" }}>
       <div className="auth-floating-card">
-        
-        {/* Dynamic Identity Branding Header Banner Accent */}
-        <div className={`auth-header-banner ${isLoginView ? 'pink-accent' : 'blue-accent'}`}>
-          <h3>{isLoginView ? "Sign In to BabyBloom" : "Create Business Account"}</h3>
-          <p>{isLoginView ? "Access your secure registry panel and order delivery records." : "Gain access to wholesale shipping rates and community catalogs."}</p>
+        <div className="auth-header-banner">
+          <h3>{isLoginView ? "Atelier Sign In" : "Create Profile"}</h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", margin: 0, lineHeight: "1.5" }}>
+            {isLoginView ? "Access your secure newborn shipping tracking logs." : "Register validation keys to open personal wholesale accounts."}
+          </p>
         </div>
 
         <form onSubmit={handleAuthSubmit} className="auth-form">
           <div className="input-group">
-            <label>Username / Handle</label>
-            <input 
-              type="text" 
-              placeholder="Enter account username" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+            <label>Username Handle</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
           </div>
 
           {!isLoginView && (
             <div className="input-group">
-              <label>Corporate E-mail Address</label>
-              <input 
-                type="email" 
-                placeholder="parent@example.com" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <label>Registry Email Address</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
           )}
 
           <div className="input-group">
-            <label>Secure Account Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••••••" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label>Account Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
 
-          <button type="submit" className="btn-primary-action auth-action-btn">
-            {isLoginView ? "Authenticate & Proceed ➔" : "Finalize Registry Verification 🚀"}
+          <button type="submit" className="btn-primary-action" style={{ width: "100%", marginTop: "12px" }}>
+            {isLoginView ? "Authenticate Keys" : "Verify Registration"}
           </button>
         </form>
 
-        <div className="auth-toggle-footer">
-          <span>{isLoginView ? "New client merchant?" : "Already verified your credentials?"}</span>
+        <div style={{ textAlign: "center", paddingBottom: "32px", fontSize: "0.9rem", color: "var(--text-muted)" }}>
+          <span>{isLoginView ? "New merchant client?" : "Already verified credentials?"}</span>
           <button 
             type="button" 
-            className="toggle-link-btn" 
-            onClick={() => setIsLoginView(!isLoginView)}
+            onClick={() => setIsLoginView(!isLoginView)} 
+            style={{ background: "none", border: "none", color: "var(--text-dark)", fontWeight: "600", textDecoration: "underline", marginLeft: "6px", cursor: "pointer" }}
           >
-            {isLoginView ? "Register Here" : "Login Securely"}
+            {isLoginView ? "Register Profile" : "Login Securely"}
           </button>
         </div>
       </div>

@@ -5,8 +5,8 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Product, Order
-from .serializers import ProductSerializer, UserSerializer, OrderSerializer
+from .models import Product, Order, OrderItem, Category, SubCategory
+from .serializers import ProductSerializer, UserSerializer, OrderSerializer, SubCategorySerializer
 
 
 # 🔹 PRODUCT APIs
@@ -20,11 +20,27 @@ def product_list(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
+        serializer = ProductSerializer(data=request.data,many=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def subcategory_list(request):
+    subcategories = SubCategory.objects.all()
+    serializer = SubCategorySerializer(subcategories, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def subcategory_detail(request, pk):
+    try:
+        subcategory = SubCategory.objects.get(id=pk)
+    except SubCategory.DoesNotExist:
+        return Response({"error": "SubCategory not found"}, status=404)
+    serializer = SubCategorySerializer(subcategory)
+    return Response(serializer.data)
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
