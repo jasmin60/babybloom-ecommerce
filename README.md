@@ -38,3 +38,7 @@ day 5:
 
      Integrated authentication (login & signup)
      implemented jwt authentication
+
+day 6:
+
+    Updated the front end

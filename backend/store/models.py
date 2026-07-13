@@ -1,82 +1,69 @@
+# backend/store/models.py
 from django.db import models
 from django.contrib.auth.models import User
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    phone_number = models.CharField(max_length=15, blank=True) 
+    place = models.CharField(max_length=100, blank=True)
+    district = models.CharField(max_length=100, blank=True)
+    pincode = models.CharField(max_length=10, blank=True)
+
+    class Meta:
+        app_label = 'store'
+
+    def __str__(self):
+        return f"Profile for {self.user.username}"
+
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-    class Meta:
-        verbose_name_plural = "Categories"
-
 class SubCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
-    parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.parent_category.name} > {self.name}"
-
-    class Meta:
-        verbose_name_plural = "SubCategories"
-
+        return self.name
 
 class Product(models.Model):
-    GENDER_TAG_CHOICES = [
-        ('all', 'Unisex / All'),
-        ('girl', 'Girl'),
-        ('boy', 'Boy'),
-        ('baby_boy', 'Baby Boy'),
-        ('baby_girl', 'Baby Girl'),
-    ]
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
-    # category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
-    gender_tag = models.CharField(max_length=20, choices=GENDER_TAG_CHOICES, default='all')
-    name = models.CharField(max_length=200)
-    price = models.FloatField()
-    description = models.TextField()
-    image = models.URLField(blank=True)
-    
-    # 🔹 New Attributes added from the ER Diagram
-    brand = models.CharField(max_length=100, blank=True, null=True)
-    color = models.CharField(max_length=50, blank=True, null=True)
-    age_group = models.CharField(max_length=50, blank=True, null=True)
-    stock_quantity = models.PositiveIntegerField(default=10)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    original_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock_quantity = models.IntegerField(default=0)
+    gender_tag = models.CharField(max_length=20, default='all') # all, girl, baby_girl, boy, baby_boy
+    image_url = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+
+    @property
+    def discount_percentage(self):
+        if self.original_price > self.price and self.original_price > 0:
+            return round(((self.original_price - self.price) / self.original_price) * 100)
+        return 0
 
     def __str__(self):
-        return f"[{self.get_gender_tag_display()}] {self.name}"
-
+        return self.name
 
 class Order(models.Model):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Processing', 'Processing'),
-        ('Shipped', 'Shipped'),
-        ('Delivered', 'Delivered'),
-        ('Cancelled', 'Cancelled'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    shipping_address = models.TextField()
+    payment_method_selected = models.CharField(max_length=20, default='COD')
+    subtotal_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_paid = models.BooleanField(default=False)
-    payment_id = models.CharField(max_length=100, blank=True, null=True)
-    
-    # 🔹 New financial and status fields from ER Diagram
-    total_amount = models.FloatField(default=0.0)
-    order_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    shipping_address = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Order {self.id} by {self.user.username}"
-
+        return f"Order #{self.id} by {self.user.username}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    unit_price = models.FloatField() # 🔹 Track historical price from ER diagram
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} (Order #{self.order.id})"
+        return f"{self.quantity} x {self.product.name if self.product else 'Deleted Product'}"

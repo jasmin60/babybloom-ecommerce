@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-&tng_eh7_=458*g7)dtbw2_eco((a$rb(!)7(q3&c*3g*1ay_9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['54.226.45.29:8000', '127.0.0.1', 'localhost', '.vercel.app']
 
 
 # Application definition
@@ -37,9 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'store',
+    'accounts',
+    'products',
+    'cart',
+    'orders',
     'rest_framework',
     'corsheaders',
+   
 ]
 
 MIDDLEWARE = [
@@ -124,11 +129,16 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
+DEBUG=False
+
 USE_I18N = True
 
 USE_TZ = True
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOW_ALL_ORIGINS = ["http://localhost:3000",
+                          "babybloom-ecommerce-self.vercel.app",]
 
 
 # Static files (CSS, JavaScript, Images)

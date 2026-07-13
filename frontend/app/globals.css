@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+html, body {
+  background-color: #FBF9F6;
+  color: #1E1A19;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+}
+
+/* 🖋️ TYPOGRAPHY SCHEMA REGULATION */
+h1, h2, h3, h4, .font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #1E1A19;
+}
+
+/* 🏢 UI ENVIRONMENT SWITCHES */
+.client-canvas-env {
+  --primary-accent: #A37B73;
+  --bg-surface: #FFF8F0;
+}
+
+.admin-workspace-env {
+  --primary-accent: #2E5A88;
+  --bg-surface: #F0F4F8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.admin-workspace-env input, 
+.admin-workspace-env select, 
+.admin-workspace-env button {
+  border-radius: 0px !important;
+}
+
+/* 🔘 EDITORIAL INTERACTION PARAMS */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-none bg-[#1E1A19] px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-[#A37B73] active:scale-95 disabled:opacity-40;
+}
+
+.btn-admin {
+  @apply inline-flex items-center justify-center gap-2 rounded-none bg-[#2E5A88] px-6 py-3.5 text-xs font-mono font-bold uppercase tracking-wider text-white transition-all duration-300 hover:bg-[#1A3654] active:scale-95;
+}
+
+.input-field {
+  @apply w-full rounded-none border border-[#C8BDB3] bg-white px-4 py-3 text-sm outline-none transition-all duration-300 focus:border-[#1E1A19];
+}
