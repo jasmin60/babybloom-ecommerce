@@ -6,12 +6,12 @@ import Cookies from 'js-cookie';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState({ items: [], total_items: 0, total_price: 0 });
   const { user } = useAuth();
 
-  // Load cart snapshot cleanly on launch
   useEffect(() => {
     const localCartData = localStorage.getItem('bb_workspace_cart');
     if (localCartData) {
@@ -23,7 +23,6 @@ export function CartProvider({ children }) {
     }
   }, []);
 
-  // Save changes to client space whenever cart updates
   const saveCartState = (updatedItems) => {
     const total_items = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
     const total_price = updatedItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
@@ -40,9 +39,9 @@ export function CartProvider({ children }) {
     }
 
     try {
-      // 🚀 Step 1: Query the product data row dynamically from the active list
       const token = Cookies.get('access_token');
-      const res = await fetch(`http://127.0.0.1:8000/api/products/${productId}/`, {
+      // 🚀 FIXED: Dynamic production resolution path variable mapping
+      const res = await fetch(`${API_BASE}/products/${productId}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const targetProduct = await res.json();
@@ -52,7 +51,6 @@ export function CartProvider({ children }) {
         return false;
       }
 
-      // Step 2: Update items array structure matching Next.js page variables
       const existingItems = [...cart.items];
       const itemIndex = existingItems.findIndex(item => item.product.id === productId);
 
@@ -107,7 +105,7 @@ export function CartProvider({ children }) {
   }, []);
 
   return (
-    <CartContext.Provider value={{ cart, add, updateItem, removeItem, empty, refreshCart: () => {} }}>
+    <CartContext.Provider value={{ cart, add, updateItem, removeItem, empty, refreshCart: empty }}>
       {children}
     </CartContext.Provider>
   );

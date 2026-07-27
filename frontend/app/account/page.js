@@ -9,7 +9,7 @@ export default function AccountPage() {
   const { user, setUser, loading } = useAuth();
   const [form, setForm] = useState({
     first_name: '', last_name: '', email: '',
-    profile: { phone: '', address_line: '', city: '', state: '', postal_code: '', country: 'India' },
+    profile: { phone_number: '', place: '', district: '', pincode: '' },
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,12 +20,10 @@ export default function AccountPage() {
         last_name: user.last_name || '',
         email: user.email || '',
         profile: {
-          phone: user.profile?.phone || '',
-          address_line: user.profile?.address_line || '',
-          city: user.profile?.city || '',
-          state: user.profile?.state || '',
-          postal_code: user.profile?.postal_code || '',
-          country: user.profile?.country || 'India',
+          phone_number: user.profile?.phone_number || '',
+          place: user.profile?.place || '',
+          district: user.profile?.district || '',
+          pincode: user.profile?.pincode || '',
         },
       });
     }
@@ -59,12 +57,11 @@ export default function AccountPage() {
           <input placeholder="Last name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="input-field" />
         </div>
         <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-field" />
-        <input placeholder="Phone" value={form.profile.phone} onChange={(e) => setForm({ ...form, profile: { ...form.profile, phone: e.target.value } })} className="input-field" />
-        <input placeholder="Address" value={form.profile.address_line} onChange={(e) => setForm({ ...form, profile: { ...form.profile, address_line: e.target.value } })} className="input-field" />
-        <div className="grid grid-cols-3 gap-4">
-          <input placeholder="City" value={form.profile.city} onChange={(e) => setForm({ ...form, profile: { ...form.profile, city: e.target.value } })} className="input-field" />
-          <input placeholder="State" value={form.profile.state} onChange={(e) => setForm({ ...form, profile: { ...form.profile, state: e.target.value } })} className="input-field" />
-          <input placeholder="Postal code" value={form.profile.postal_code} onChange={(e) => setForm({ ...form, profile: { ...form.profile, postal_code: e.target.value } })} className="input-field" />
+        <input placeholder="Phone Number" value={form.profile.phone_number} onChange={(e) => setForm({ ...form, profile: { ...form.profile, phone_number: e.target.value } })} className="input-field" />
+        <input placeholder="City / Place Address" value={form.profile.place} onChange={(e) => setForm({ ...form, profile: { ...form.profile, place: e.target.value } })} className="input-field" />
+        <div className="grid grid-cols-2 gap-4">
+          <input placeholder="District" value={form.profile.district} onChange={(e) => setForm({ ...form, profile: { ...form.profile, district: e.target.value } })} className="input-field" />
+          <input placeholder="Pincode" value={form.profile.pincode} onChange={(e) => setForm({ ...form, profile: { ...form.profile, pincode: e.target.value } })} className="input-field" />
         </div>
         <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60">
           {submitting ? 'Saving...' : 'Save changes'}
