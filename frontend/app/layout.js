@@ -181,27 +181,51 @@ export default function RootLayout({ children }) {
       toast.success("Added to your liked list! 💖");
     }
   };
-
-  const executeOrderDispatchManifest = async () => {
-    if (cart.items.length === 0) return;
-    const targetAddress = `${profileForm.place}, ${profileForm.district}, PIN: ${profileForm.pincode}`;
-    const orderPayload = {
-      shipping_address: targetAddress, payment_method_selected: 'COD',
-      subtotal_amount: cart.total_price, total_amount: cart.total_price,
-      items: cart.items.map(item => ({ product: item.product.id, quantity: item.quantity }))
-    };
-    try {
-      await axios.post(`${API_BASE}/orders/`, orderPayload, getAuthHeaders());
-      toast.success("Order manifested successfully!");
-      setCart({ items: [], total_items: 0, total_price: 0 });
-      fetchProductsCatalog();
-      fetchOrdersHistoryLedger();
-      setActiveTab('history');
-    } catch (err) {
-      toast.error("Could not clear out active transaction row.");
-    }
+  
+  const handleMoveWishlistToCart = (product) => {
+    handleAddToCart(product);
+    setWishlist(prev => prev.filter (item => item.id !== product.id));
+    setActiveTab('cart');
+    toast.success("Moved to shopping bag ");
   };
 
+  // State variable for single-page layout checkout payment method
+const [layoutPaymentMethod, setLayoutPaymentMethod] = useState('COD');
+
+const executeOrderDispatchManifest = async () => {
+  if (cart.items.length === 0) {
+    toast.error("Your cart is empty.");
+    return;
+  }
+  const targetAddress = profileForm.place 
+    ? `${profileForm.place}, ${profileForm.district}, PIN: ${profileForm.pincode}` 
+    : "Default Delivery Address";
+
+  const orderPayload = {
+    shipping_address: targetAddress,
+    payment_method_selected: layoutPaymentMethod,
+    subtotal_amount: cart.total_price,
+    total_amount: cart.total_price,
+    items: cart.items.map(item => ({ product: item.product.id, quantity: item.quantity }))
+  };
+
+  try {
+    // 🚀 Uses getAuthHeaders() properly formatted for SimpleJWT
+    await axios.post(`${API_BASE}/orders/`, orderPayload, getAuthHeaders());
+    toast.success("Order placed successfully! 🎉");
+    
+    // Clear out active transaction basket
+    setCart({ items: [], total_items: 0, total_price: 0 });
+    localStorage.removeItem('bb_workspace_cart');
+    
+    fetchProductsCatalog();
+    fetchOrdersHistoryLedger();
+    setActiveTab('history');
+  } catch (err) {
+    console.error(err.response?.data);
+    toast.error("Could not place order. Please try again.");
+  }
+};
   const getProductImageUrl = (imageProp) => {
     if (!imageProp) return null;
     if (imageProp.startsWith('http://') || imageProp.startsWith('https://')) return imageProp;
@@ -538,38 +562,67 @@ export default function RootLayout({ children }) {
                 </div>
               )}
 
-              {/* THE ADDRESS-AWARE ONE-CLICK CHECKOUT PAGE */}
-              {activeTab === 'checkout' && (
-                <div className="checkout-page">
-                  <h2>Complete Checkout</h2>
-                  <div className="address-box">
-                    <span>Shipping Address:</span>
-                    <strong>{profileForm.place ? `${profileForm.place}, ${profileForm.district}, PIN: ${profileForm.pincode}` : "Delhi Logistics Depot Center Hub"}</strong>
-                  </div>
-                  <div className="payment-method">Method: Cash on Delivery (COD)</div>
-                  <button onClick={executeOrderDispatchManifest} className="confirm-btn">CONFIRM COD PURCHASE</button>
-                </div>
-              )}
+              {/* THE CHECKOUT PAGE WITH 3 PAYMENT OPTIONS */}
+{activeTab === 'checkout' && (
+  <div className="checkout-page">
+    <h2>Complete Checkout</h2>
+    <div className="address-box">
+      <span>Shipping Address:</span>
+      <strong>{profileForm.place ? `${profileForm.place}, ${profileForm.district}, PIN: ${profileForm.pincode}` : "Default Delivery Address"}</strong>
+    </div>
+
+    <div className="payment-method-selector mb-4">
+      <span className="block text-xs uppercase text-neutral-500 mb-2 font-bold">Select Payment Method:</span>
+      <div className="space-y-2">
+        {[
+          { id: 'COD', label: '💵 Cash on Delivery (COD)' },
+          { id: 'UPI', label: '📱 UPI / QR Payment' },
+          { id: 'CARD', label: '💳 Credit / Debit Card' }
+        ].map(method => (
+          <label key={method.id} className="flex items-center gap-2 cursor-pointer text-sm font-semibold p-2 border rounded">
+            <input 
+              type="radio" 
+              name="layout_payment" 
+              value={method.id} 
+              checked={layoutPaymentMethod === method.id} 
+              onChange={e => setLayoutPaymentMethod(e.target.value)} 
+            />
+            {method.label}
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <button onClick={executeOrderDispatchManifest} className="confirm-btn w-full">
+      CONFIRM ORDER · ₹{cart.total_price}
+    </button>
+  </div>
+)}
 
               {/* WISHLIST REGISTERS */}
-              {activeTab === 'wishlist' && (
-                <div className="cart-page">
-                  <h2>Your Wishlist ({wishlist.length} items)</h2>
-                  {wishlist.length === 0 ? (
-                    <p className="text-neutral-400 italic">No items saved yet.</p>
-                  ) : (
-                    wishlist.map((p, i) => (
-                      <div key={i} className="cart-item">
-                        <span>{p.name}</span>
-                        <div className="flex-row-gap">
-                          <button onClick={() => handleAddToCart(p)} className="buy-btn">Move to Bag</button>
-                          <button onClick={() => handleToggleLikeProduct(p)} className="profile-signout-btn py-1">Remove</button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+{activeTab === 'wishlist' && (
+  <div className="cart-page">
+    <h2>Your Wishlist ({wishlist.length} items)</h2>
+    {wishlist.length === 0 ? (
+      <p className="text-neutral-400 italic">No items saved yet.</p>
+    ) : (
+      wishlist.map((p, i) => (
+        <div key={i} className="cart-item">
+          <span>{p.name}</span>
+          <div className="flex-row-gap">
+            {/* 🚀 Make sure handleMoveWishlistToCart is called here */}
+            <button onClick={() => handleMoveWishlistToCart(p)} className="buy-btn">
+              Move to Bag
+            </button>
+            <button onClick={() => handleToggleLikeProduct(p)} className="profile-signout-btn py-1">
+              Remove
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+)}
 
               {/* TRANSACTION HISTORY */}
               {activeTab === 'history' && (
