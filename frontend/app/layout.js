@@ -32,6 +32,7 @@ export default function RootLayout({ children }) {
 
   // User Authentication Forms
   const [username, setUsername] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [password, setPassword] = useState('');
   const [profileForm, setProfileForm] = useState({
     email: '', first_name: '', last_name: '', phone_number: '', district: '', place: '', pincode: ''
@@ -120,40 +121,70 @@ export default function RootLayout({ children }) {
   }, [fetchProductsCatalog, fetchMainCategories, fetchUserProfileMatrix, fetchOrdersHistoryLedger]);
 
   const handleSystemAuthentication = async (e) => {
-    e.preventDefault();
-    try {
-      if (authView === 'login') {
-        const { data } = await axios.post(`${API_BASE}/login/`, { username, password });
-        Cookies.set('access_token', data.access, { expires: 1 });
-        Cookies.set('refresh_token', data.refresh, { expires: 7 });
-        localStorage.setItem('username', username);
-        localStorage.setItem('trigger_welcome_popup', 'true'); // 🚀 Flag set here to unlock popup on lifecycle reload
-        
-        setIsAuthenticated(true);
-        setIsAdmin(username.toLowerCase().includes('admin'));
-        toast.success(`Signed in successfully!`);
-        window.location.reload();
-      } else {
-        const registrationPayload = {
-          username: username.trim(),
-          email: profileForm.email.trim(),
-          password: password,
-          profile: {
-            phone_number: profileForm.phone_number.trim(),
-            district: profileForm.district.trim(),
-            place: profileForm.place.trim(),
-            pincode: profileForm.pincode.trim()
-          }
-        };
-        await axios.post(`${API_BASE}/register/`, registrationPayload);
-        toast.success(`Account created successfully! Please sign in.`);
-        setAuthView('login');
-      }
-    } catch (err) {
-      console.error("Auth flow error:", err);
-      toast.error('Authentication failed. Please check your verification metrics.');
+  e.preventDefault();
+
+  // 🔒 Password Verification Checks for Registration
+  if (authView === 'register') {
+    // Step 1: Matching Check
+    if (password !== passwordConfirm) {
+      toast.error('Passwords do not match! Please verify your password.');
+      return;
     }
-  };
+    // Step 2: Security Strength Check
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters long.');
+      return;
+    }
+  }
+
+  try {
+    if (authView === 'login') {
+      const { data } = await axios.post(`${API_BASE}/login/`, { username, password });
+      Cookies.set('access_token', data.access, { expires: 1 });
+      Cookies.set('refresh_token', data.refresh, { expires: 7 });
+      localStorage.setItem('username', username);
+      localStorage.setItem('trigger_welcome_popup', 'true'); // 🚀 Flag set here to unlock popup on lifecycle reload
+      
+      setIsAuthenticated(true);
+      setIsAdmin(username.toLowerCase().includes('admin'));
+      toast.success(`Signed in successfully!`);
+      window.location.reload();
+    } else {
+      const registrationPayload = {
+        username: username.trim(),
+        email: profileForm.email.trim(),
+        password: password,
+        profile: {
+          phone_number: profileForm.phone_number.trim(),
+          district: profileForm.district.trim(),
+          place: profileForm.place.trim(),
+          pincode: profileForm.pincode.trim()
+        }
+      };
+      await axios.post(`${API_BASE}/register/`, registrationPayload);
+      toast.success(`Account created successfully! Please sign in.`);
+      setAuthView('login');
+      setPasswordConfirm(''); // Clear confirmation field on success
+    }
+  } catch (err) {
+    console.error("Auth flow error:", err);
+    toast.error('Authentication failed. Please check your verification metrics.');
+  }
+};
+
+  const [avatarPreview, setAvatarPreview] = useState(profileForm.avatar || '');
+
+const handleImageCapture = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result);
+      setProfileForm(prev => ({ ...prev, avatar: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
   const handleAddToCart = (product) => {
     if (product.stock_quantity <= 0) {
@@ -333,22 +364,32 @@ const executeOrderDispatchManifest = async () => {
             </div>
             <div className="auth-form-box">
               <form onSubmit={handleSystemAuthentication}>
-                <h2>{authView === 'login' ? 'Sign In' : 'Create Account'}</h2>
-                
-                <input required placeholder="Username" type="text" value={username} onChange={e => setUsername(e.target.value)} className="input-field" />
-                <input required placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="input-field" />
-                
-                {authView === 'register' && (
-                  <div className="auth-register-fields">
-                    <input required placeholder="Email Address" type="email" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} className="input-field" />
-                    <input required placeholder="Phone Number" type="text" value={profileForm.phone_number} onChange={e => setProfileForm({...profileForm, phone_number: e.target.value})} className="input-field" />
-                    <input required placeholder="City / Place" type="text" value={profileForm.place} onChange={e => setProfileForm({...profileForm, place: e.target.value})} className="input-field" />
-                    <div className="edit-grid">
-                      <input required placeholder="District" type="text" value={profileForm.district} onChange={e => setProfileForm({...profileForm, district: e.target.value})} className="input-field" />
-                      <input required placeholder="Pincode" type="text" value={profileForm.pincode} onChange={e => setProfileForm({...profileForm, pincode: e.target.value})} className="input-field" />
-                    </div>
-                  </div>
-                )}
+  <h2>{authView === 'login' ? 'Sign In' : 'Create Account'}</h2>
+  
+  <input required placeholder="Username" type="text" value={username} onChange={e => setUsername(e.target.value)} className="input-field" />
+  <input required placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="input-field" />
+  
+  {authView === 'register' && (
+    <div className="auth-register-fields">
+      {/* 🚀 ADD THE CONFIRM PASSWORD FIELD RIGHT HERE */}
+      <input
+        required
+        type="password"
+        placeholder="Confirm Password"
+        value={passwordConfirm}
+        onChange={(e) => setPasswordConfirm(e.target.value)}
+        className="input-field"
+      />
+
+      <input required placeholder="Email Address" type="email" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} className="input-field" />
+      <input required placeholder="Phone Number" type="text" value={profileForm.phone_number} onChange={e => setProfileForm({...profileForm, phone_number: e.target.value})} className="input-field" />
+      <input required placeholder="City / Place" type="text" value={profileForm.place} onChange={e => setProfileForm({...profileForm, place: e.target.value})} className="input-field" />
+      <div className="edit-grid">
+        <input required placeholder="District" type="text" value={profileForm.district} onChange={e => setProfileForm({...profileForm, district: e.target.value})} className="input-field" />
+        <input required placeholder="Pincode" type="text" value={profileForm.pincode} onChange={e => setProfileForm({...profileForm, pincode: e.target.value})} className="input-field" />
+      </div>
+    </div>
+  )}
                 
                 <button type="submit" className="submit-btn">
                   {authView === 'login' ? 'Continue Session Login' : 'Register Account'}
@@ -420,6 +461,37 @@ const executeOrderDispatchManifest = async () => {
                   </div>
                 </div>
               )}
+
+
+              {/* ANIMATED SUBCATEGORIES SECTION */}
+<div className="home-subcategories-section py-8">
+  <h3 className="section-title text-2xl font-bold mb-6 flex items-center gap-2">
+    <span>✨</span> Featured Collections
+  </h3>
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+    {categories.flatMap(c => c.subcategories || []).map((sub, idx) => (
+      <div 
+        key={sub.id || idx}
+        onClick={() => handleSelectHomeCategory(sub.name)}
+        className="group relative h-48 overflow-hidden rounded-2xl bg-bloom-cream shadow-md transition-all duration-500 hover:-translate-y-2 hover:shadow-xl cursor-pointer"
+      >
+        <img 
+          src={sub.image_url || 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500'} 
+          alt={sub.name}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 flex flex-col justify-end">
+          <h4 className="text-white font-bold text-lg tracking-wide group-hover:text-bloom-pink transition-colors">
+            {sub.name}
+          </h4>
+          <span className="text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Shop Collection →
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
 
               {/* MARKETPLACE CATALOG DISPLAY GRID */}
               {activeTab === 'shop' && (
@@ -649,6 +721,27 @@ const executeOrderDispatchManifest = async () => {
                         Sign Out Account
                       </button>
                     </div>
+
+                    <div className="flex flex-col items-center gap-4 mb-6">
+  <div className="relative h-24 w-24 overflow-hidden rounded-full border-4 border-bloom-pink shadow-md">
+    <img 
+      src={avatarPreview || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'} 
+      alt="Profile Avatar" 
+      className="h-full w-full object-cover"
+    />
+  </div>
+  <label className="btn-primary text-xs py-2 px-4 cursor-pointer">
+    📷 Upload / Take Photo
+    <input 
+      type="file" 
+      accept="image/*" 
+      capture="user" 
+      onChange={handleImageCapture} 
+      className="hidden" 
+    />
+  </label>
+</div>
+
                     <div className="profile-detail-row">
                       <span>Full Name:</span>
                       <strong>
