@@ -120,7 +120,7 @@ export default function RootLayout({ children }) {
     }
   }, [fetchProductsCatalog, fetchMainCategories, fetchUserProfileMatrix, fetchOrdersHistoryLedger]);
 
-  const handleSystemAuthentication = async (e) => {
+const handleSystemAuthentication = async (e) => {
   e.preventDefault();
 
   // 🔒 Password Verification Checks for Registration
@@ -143,7 +143,7 @@ export default function RootLayout({ children }) {
       Cookies.set('access_token', data.access, { expires: 1 });
       Cookies.set('refresh_token', data.refresh, { expires: 7 });
       localStorage.setItem('username', username);
-      localStorage.setItem('trigger_welcome_popup', 'true'); // 🚀 Flag set here to unlock popup on lifecycle reload
+      localStorage.setItem('trigger_welcome_popup', 'true');
       
       setIsAuthenticated(true);
       setIsAdmin(username.toLowerCase().includes('admin'));
@@ -168,7 +168,27 @@ export default function RootLayout({ children }) {
     }
   } catch (err) {
     console.error("Auth flow error:", err);
-    toast.error('Authentication failed. Please check your verification metrics.');
+    
+    // 🚀 IMPROVED ERROR DISPLAY: Extract exact Django error responses
+    let errorMessage = 'Authentication failed. Please try again.';
+
+    if (err.response?.data) {
+      const res = err.response.data;
+      if (typeof res === 'string') {
+        errorMessage = res;
+      } else if (res.detail) {
+        errorMessage = res.detail;
+      } else if (res.error) {
+        errorMessage = res.error;
+      } else if (typeof res === 'object') {
+        // Formats field-specific validation errors (e.g., username: "Already taken")
+        const key = Object.keys(res)[0];
+        const val = Array.isArray(res[key]) ? res[key][0] : res[key];
+        errorMessage = `${key.toUpperCase()}: ${val}`;
+      }
+    }
+
+    toast.error(errorMessage);
   }
 };
 
