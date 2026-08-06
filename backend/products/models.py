@@ -15,6 +15,7 @@ class SubCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
     parent_category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
+    image_url = models.URLField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f"{self.parent_category.name} > {self.name}"

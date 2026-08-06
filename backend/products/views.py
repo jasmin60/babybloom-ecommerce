@@ -1,15 +1,17 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework import status,viewsets,serializers
+from rest_framework import status,viewsets
 from django.contrib.auth.models import User
-from .category_api import MainCategorySerializer
+
+
+
 from .models import Category, Product, SubCategory
 from .serializers import ProductSerializer, UserSerializer, OrderSerializer, SubCategorySerializer,CategorySerializer
 
-from products.models import Product, SubCategory,Category
+
 from orders.models import Order, OrderItem
-from products.serializers import ProductSerializer, UserSerializer, OrderSerializer, SubCategorySerializer
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -89,6 +91,31 @@ def product_detail(request, pk):
 @api_view(['GET'])
 def subcategory_list(request):
     return Response(SubCategorySerializer(SubCategory.objects.all(), many=True).data)
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """
+    Handles all operations for main Categories.
+    URL endpoints automatically managed.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+
+class SubCategoryViewSet(viewsets.ModelViewSet):
+    """
+    Handles all operations for Subcategories.
+    """
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer
+    permission_classes = [AllowAny]
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    Handles all operations for Products (Add, Edit, List, Delete).
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]
 
 @api_view(['POST'])
 def register_user(request):

@@ -13,11 +13,13 @@ class MainCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'icon', 'product_count']
 
     def get_product_count(self, obj):
+        total=0
         # Counts products attached directly to this category or via its subcategories
-        if hasattr(obj, 'products'):
-            return obj.products.count()
-        return 0
-
+        if hasattr(obj, 'subcategories'):
+            for sub in obj.subcategories.all():
+                total += sub.products.count()   
+           
+        return total + obj.products.count()  # Add products directly under this category
 # 2. Public API View to list Main Categories
 @api_view(['GET'])
 @permission_classes([AllowAny])
