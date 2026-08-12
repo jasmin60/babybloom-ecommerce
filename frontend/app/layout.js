@@ -8,8 +8,8 @@ import axios from 'axios';
 import { Search, ShoppingBag, User, Heart, Compass, LayoutDashboard, Receipt, HelpCircle, Shield, Truck, Layers, ChevronDown, X, Sparkles } from 'lucide-react'; // 🚀 Added X and Sparkles icons
 import toast, { Toaster } from 'react-hot-toast';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
-const MEDIA_BASE = 'http://127.0.0.1:8000'; 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
+const MEDIA_BASE =process.env.NEXT_PUBLIC_MEDIA_URL || 'http://127.0.0.1:8000'; 
 
 export default function RootLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

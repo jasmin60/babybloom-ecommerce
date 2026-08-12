@@ -18,6 +18,15 @@ const nextConfig = {
       { protocol: 'https', hostname: '**', pathname: '/**' },
     ],
   },
+  // 🛡️ Route API calls safely from Vercel HTTPS to AWS HTTP
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://13.218.96.115:8000/api/:path*',
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
