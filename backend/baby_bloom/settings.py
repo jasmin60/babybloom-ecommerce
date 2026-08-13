@@ -135,13 +135,15 @@ USE_I18N = True
 
 USE_TZ = True
 
+# baby_bloom/settings.py
+
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_ALL_ORIGINS = [
-                          "http://localhost:3000",
-                          "http://127.0.0.1:3000",
-                          "babybloom-ecommerce-eta.vercel.app",
-                          ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://babybloom-ecommerce-eta.vercel.app",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
