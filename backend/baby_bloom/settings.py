@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-&tng_eh7_=458*g7)dtbw2_eco((a$rb(!)7(q3&c*3g*1ay_9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.218.96.115 ', '127.0.0.1', 'localhost', '.vercel.app']
+ALLOWED_HOSTS = ['13.218.96.115 ', '127.0.0.1', 'localhost', '.vercel.app','babybloom-ecommerce-eta.vercel.app']
 
 
 # Application definition
@@ -137,9 +137,11 @@ USE_TZ = True
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_ALL_ORIGINS = ["http://localhost:3000",
+CORS_ALLOW_ALL_ORIGINS = [
+                          "http://localhost:3000",
                           "http://127.0.0.1:3000",
-                          "babybloom-ecommerce-eta.vercel.app",]
+                          "babybloom-ecommerce-eta.vercel.app",
+                          ]
 
 CORS_ALLOW_CREDENTIALS = True
 

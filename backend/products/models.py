@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True,null=True,blank=True)
     image_url = models.URLField(max_length=500, blank=True, null=True)
 
     class Meta:
@@ -30,7 +30,7 @@ class SubCategory(models.Model):
         related_name="subcategories"
     )
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True,null=True,blank=True)
     image_url = models.URLField(max_length=500, blank=True, null=True)
 
     class Meta:
@@ -68,7 +68,7 @@ class Product(models.Model):
 
     slug = models.SlugField(
         max_length=255,
-        unique=True
+        unique=True,null=True,blank=True
     )
 
     description = models.TextField()

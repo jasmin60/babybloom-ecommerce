@@ -4,7 +4,7 @@ from .models import Category, SubCategory, Product
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     # Displays clean row data columns in your admin summary grid table list
-    list_display = ('name', 'original_price', 'price', 'get_discount', 'stock_quantity', 'subcategory')
+    list_display = ('name', 'original_price', 'discounted_price',  'stock_quantity', 'subcategory')
     
     # Filter panels matching your exact product fields
     list_filter = ('gender_tag', 'subcategory', 'brand')

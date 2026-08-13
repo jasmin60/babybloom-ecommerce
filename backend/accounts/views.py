@@ -3,6 +3,36 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        username_or_email = attrs.get("username")
+        password = attrs.get("password")
+
+        if username_or_email and "@" in username_or_email:
+            try:
+                user = User.objects.get(email=username_or_email)
+                attrs["username"] = user.username
+            except User.DoesNotExist:
+                pass
+                
+        return super().validate(attrs)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_user(request):
+    print("DEBUG - Incoming Login Data:", request.data)  # Prints in your Gunicorn terminal
+    # ... your login logic ...
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
